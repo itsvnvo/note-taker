@@ -22,6 +22,7 @@ module.exports = (app) => {
         const newNote = req.body
         fs.readFile(path.resolve('db/', 'db.json'), 'utf-8', (err, dbInfo) => {
             const parsed = JSON.parse(dbInfo)
+            req.body.id = dbInfo.length
             if (err) console.error(err);
             parsed.push(newNote)
             fs.writeFile(path.resolve('db/', 'db.json'), JSON.stringify(parsed), err => {
@@ -30,5 +31,23 @@ module.exports = (app) => {
             });
         });
         res.json(newNote);
+    })
+    app.delete("/api/notes/:id", function(req, res) {
+        let dbNote = JSON.parse(fs.readFileSync("./db/db.json", "utf8"));
+        let noteID = req.params.id;
+        let newID = 0;
+        console.log(`Deleted Note`);
+        dbNote = dbNote.filter(noteArr => {
+            console.log(dbNote)
+            return noteArr.id != noteID;
+        })
+        
+        for (noteArr of dbNote) {
+            noteArr.id = newID.toString();
+            newID++;
+        }
+    
+        fs.writeFileSync("./db/db.json", JSON.stringify(dbNote));
+        res.json(dbNote);
     })
 };
